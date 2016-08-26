@@ -1,11 +1,19 @@
 'use strict';
 
+if (process.argv.length < 3) {
+    console.error('No symbol provided.');
+    process.exit(1);
+}
+
+// Paramters
+var symbol = process.argv[2];
+
 // Libraries
 var RsiIndicator = require('../../lib/indicators/rsi');
 var BollingerBandsIndicator = require('../../lib/indicators/bollingerBands');
 
 // Data
-var ticks = require('../../data/EURUSD.json');
+var ticks = require('../../data/' + symbol + '.json');
 var tickCount = ticks.length;
 
 // State
@@ -26,12 +34,8 @@ var rsiLength = 0;
 var rsiBounds = 0;
 var bollingerBandsLength = 0;
 var bollingerBandsDeviations = 0;
-// var rsiLength = 29;
-// var rsiBounds = 40;
-// var bollingerBandsLength = 24;
-// var bollingerBandsDeviations = 2.4;
 var progress = 0;
-var total = (30 - 1) * (40 - 1) * (25 - 17) * ((3.0 - 1.9) * 10);
+var total = (30 - 1) * (40 - 1) * (25 - 17) * ((3.0 - 2.0) * 10);
 var indicatorChanges = [];
 
 // Indicators
@@ -119,7 +123,7 @@ for (rsiLength = 2; rsiLength <= 30; rsiLength++) {
                             stats.breakEvenCount++;
                         }
                     }
-                    
+
                     // Put
                     if (tick.rsi >= (100 - rsiBounds) && tick.mid < tick.bollingerBandLower) {
                         if (futureTick.mid < tick.mid) {
@@ -145,7 +149,7 @@ for (rsiLength = 2; rsiLength <= 30; rsiLength++) {
 
                 winRate = (stats.winCount / stats.tradeCount) * 100;
 
-                if (winRate > maxWinRate && stats.tradeCount >= 15) {
+                if (winRate > maxWinRate && stats.tradeCount >= 10) {
                     maxWinRate = winRate;
                     optimialSettings = {
                         rsiLength: rsiLength,
