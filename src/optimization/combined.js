@@ -10,6 +10,9 @@ if (process.argv.length < 4) {
     process.exit(1);
 }
 
+// Settings
+var settings = require('../../settings.json');
+
 // Parameters
 var symbol = process.argv[2];
 var minTradeCount = parseInt(process.argv[3]);
@@ -25,6 +28,7 @@ var tickCount = ticks.length;
 // State
 var tickIndex = {};
 var cumulativeTicks = [];
+var previousTick = null;
 var previousFutureTick = null;
 var stats = {
     tradeCount: 0,
@@ -36,10 +40,6 @@ var winRate = 0;
 var maxWinRate = 0;
 var optimialSettings = {};
 var optimialStats = {};
-var rsiLength = 0;
-var rsiBounds = 0;
-var bollingerBandsLength = 0;
-var bollingerBandsDeviations = 0;
 var progress = 0;
 var total = (30 - 1) * (40 - 1) * (25 - 17) * ((3.0 - 2.0) * 10);
 // var indicatorChanges = [];
@@ -49,7 +49,7 @@ var indicators = {};
 
 // Create a by-minute tick index.
 ticks.forEach(function(tick, index) {
-    tickIndex[tick.timestamp] = findFutureTick(tick, index);
+    tickIndex[tick.createdAt] = findFutureTick(tick, index);
 });
 
 for (rsiLength = 2; rsiLength <= 30; rsiLength++) {
@@ -73,9 +73,16 @@ for (rsiLength = 2; rsiLength <= 30; rsiLength++) {
                 previousFutureTick = null;
 
                 ticks.forEach(function(tick, index) {
+                    // Reset things if there is >= an hour gap.
+                    if (previousTick && new Date(tick.createdAt) - new Date(previousTick.createdAt) > 60 * 60 * 1000) {
+                        cumulativeTicks = [];
+                        previousFutureTick = null;
+                        previousTick = null;
+                    }
+
                     cumulativeTicks.push({close: tick.mid});
 
-                    var futureTick = tickIndex[tick.timestamp];
+                    var futureTick = tickIndex[tick.createdAt];
 
                     for (var indicatorIndex in indicators) {
                         let indicatorProperty = '';
@@ -101,12 +108,7 @@ for (rsiLength = 2; rsiLength <= 30; rsiLength++) {
                     }
 
                     // Don't worry about the last minute of the tick data.
-                    if (previousFutureTick && futureTick.timestamp === previousFutureTick.timestamp) {
-                        return;
-                    }
-
-                    // Account for possible breaks.
-                    if (futureTick.timestamp - tick.timestamp <= 50 * 1000) {
+                    if (previousFutureTick && futureTick.createdAt === previousFutureTick.createdAt) {
                         return;
                     }
 
@@ -145,6 +147,7 @@ for (rsiLength = 2; rsiLength <= 30; rsiLength++) {
                         }
                     }
 
+                    previousTick = tick;
                     previousFutureTick = futureTick;
 
                     delete tick.rsi;
@@ -188,7 +191,7 @@ function findFutureTick(tick, startingIndex) {
     var futureTick = null;
 
     for (index = startingIndex; index < tickCount; index++) {
-        if (futureTick && new Date(ticks[index].timestamp) - new Date(tick.timestamp) > 60 * 1000) {
+        if (futureTick && new Date(ticks[index].createdAt) - new Date(tick.createdAt) > 60 * 1000) {
             break;
         }
         else {
