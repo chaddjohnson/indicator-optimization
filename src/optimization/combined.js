@@ -5,8 +5,14 @@ if (process.argv.length < 3) {
     process.exit(1);
 }
 
-// Paramters
+if (process.argv.length < 4) {
+    console.error('No minTradeCount provided.');
+    process.exit(1);
+}
+
+// Parameters
 var symbol = process.argv[2];
+var minTradeCount = parseInt(process.argv[3]);
 
 // Libraries
 var RsiIndicator = require('../../lib/indicators/rsi');
@@ -36,7 +42,7 @@ var bollingerBandsLength = 0;
 var bollingerBandsDeviations = 0;
 var progress = 0;
 var total = (30 - 1) * (40 - 1) * (25 - 17) * ((3.0 - 2.0) * 10);
-var indicatorChanges = [];
+// var indicatorChanges = [];
 
 // Indicators
 var indicators = {};
@@ -149,7 +155,7 @@ for (rsiLength = 2; rsiLength <= 30; rsiLength++) {
 
                 winRate = (stats.winCount / stats.tradeCount) * 100;
 
-                if (winRate > maxWinRate && stats.tradeCount >= 10) {
+                if (winRate > maxWinRate && stats.tradeCount >= minTradeCount) {
                     maxWinRate = winRate;
                     optimialSettings = {
                         rsiLength: rsiLength,
