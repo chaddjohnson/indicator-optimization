@@ -42,6 +42,10 @@ var optimialSettings = {};
 var optimialStats = {};
 var progress = 0;
 var total = (30 - 1) * (40 - 1) * (25 - 17) * ((3.0 - 2.0) * 10);
+var rsiLength = 0;
+var rsiBounds = 0;
+var bollingerBandsLength = 0;
+var bollingerBandsDeviations = 0;
 // var indicatorChanges = [];
 
 // Indicators
