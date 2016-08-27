@@ -66,6 +66,7 @@ _.times(evolutionCount, function(index) {
 });
 
 // Show the results.
+process.stdout.write('\n');
 console.log(geneticAlgorithm.best());
 
 
@@ -80,23 +81,23 @@ function mutationFunction(oldPhenotype) {
     // Use oldPhenotype and some random function to make a change to the phenotype.
     switch (propertyIndex) {
         case 0:
-            resultPhenotype.rsiLength += generateRandomNumber(2, 35);
+            resultPhenotype.rsiLength = generateRandomNumber(2, 35);
             break;
 
         case 1:
             let change = generateRandomNumber(2, 40);
 
-            resultPhenotype.rsiOverbought += 100 - change;
-            resultPhenotype.rsiOversold += change;
+            resultPhenotype.rsiOverbought = 100 - change;
+            resultPhenotype.rsiOversold = change;
 
             break;
 
         case 2:
-            resultPhenotype.bollingerBandsLength += generateRandomNumber(15, 30);
+            resultPhenotype.bollingerBandsLength = generateRandomNumber(15, 30);
             break;
 
         case 3:
-            resultPhenotype.bollingerBandsDeviations += generateRandomNumber(1.8, 3.2, 1);
+            resultPhenotype.bollingerBandsDeviations = generateRandomNumber(1.8, 3.2, 1);
             break;
     }
 
