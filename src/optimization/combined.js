@@ -4,7 +4,6 @@ if (process.argv.length < 3) {
     console.error('No symbol provided.');
     process.exit(1);
 }
-
 if (process.argv.length < 4) {
     console.error('No minTradeCount provided.');
     process.exit(1);
@@ -82,6 +81,14 @@ for (rsiLength = 2; rsiLength <= 30; rsiLength++) {
                         cumulativeTicks = [];
                         previousFutureTick = null;
                         previousTick = null;
+
+                        delete indicators.rsi;
+                        delete indicators.bollingerBands;
+
+                        indicators = {
+                            rsi: new RsiIndicator({length: rsiLength}, {rsi: 'rsi'}),
+                            bollingerBands: new BollingerBandsIndicator({length: bollingerBandsLength, deviations: bollingerBandsDeviations}, {middle: 'bollingerBandMiddle', upper: 'bollingerBandUpper', lower: 'bollingerBandLower'})
+                        };
                     }
 
                     cumulativeTicks.push({close: tick.mid});
