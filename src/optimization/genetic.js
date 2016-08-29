@@ -169,8 +169,12 @@ function fitnessFunction(phenotype) {
 
     var results = backtest(phenotype);
 
+    if (results.tradeCount < 100) {
+        return 0;
+    }
+
     // Calculate the fitness based on the results and trade count.
-    fitness = ((results.winRate / 100) * 0.5) + ((results.tradeCount / 100) * 0.5);
+    fitness = (results.winRate / 100) * 0.5;
 
     return fitness;
 }
