@@ -88,9 +88,11 @@ parser.parse(argv.file).then(function(parsedTicks) {
         geneticAlgorithm.evolve();
     });
 
+    var bestPhenotype = geneticAlgorithm.best();
+
     // Show the results.
     process.stdout.write('\n');
-    console.log(geneticAlgorithm.best());
+    console.log(_.extend({}, bestPhenotype, backtest(bestPhenotype)));
     process.stdout.write('\n');
 });
 
@@ -188,7 +190,7 @@ function fitnessFunction(phenotype) {
 //     return true;
 // }
 
-function backtest(settings) {
+function backtest(phenotype) {
     var cumulativeTicks = [];
     var previousTick = null;
     var previousFutureTick = null;
@@ -199,8 +201,8 @@ function backtest(settings) {
         breakEvenCount: 0
     };
     var indicators = {
-        rsi: new RsiIndicator({length: settings.rsiLength}, {rsi: 'rsi'}),
-        bollingerBands: new BollingerBandsIndicator({length: settings.bollingerBandsLength, deviations: settings.bollingerBandsDeviations}, {middle: 'bollingerBandMiddle', upper: 'bollingerBandUpper', lower: 'bollingerBandLower'})
+        rsi: new RsiIndicator({length: phenotype.rsiLength}, {rsi: 'rsi'}),
+        bollingerBands: new BollingerBandsIndicator({length: phenotype.bollingerBandsLength, deviations: phenotype.bollingerBandsDeviations}, {middle: 'bollingerBandMiddle', upper: 'bollingerBandUpper', lower: 'bollingerBandLower'})
     };
 
     ticks.forEach(function(tick, index) {
@@ -214,8 +216,8 @@ function backtest(settings) {
             delete indicators.bollingerBands;
 
             indicators = {
-                rsi: new RsiIndicator({length: settings.rsiLength}, {rsi: 'rsi'}),
-                bollingerBands: new BollingerBandsIndicator({length: settings.bollingerBandsLength, deviations: settings.bollingerBandsDeviations}, {middle: 'bollingerBandMiddle', upper: 'bollingerBandUpper', lower: 'bollingerBandLower'})
+                rsi: new RsiIndicator({length: phenotype.rsiLength}, {rsi: 'rsi'}),
+                bollingerBands: new BollingerBandsIndicator({length: phenotype.bollingerBandsLength, deviations: phenotype.bollingerBandsDeviations}, {middle: 'bollingerBandMiddle', upper: 'bollingerBandUpper', lower: 'bollingerBandLower'})
             };
         }
 
@@ -253,7 +255,7 @@ function backtest(settings) {
         }
 
         // Call
-        if (indicatorValues.rsi <= settings.rsiOversold && tick.mid > indicatorValues.bollingerBandUpper) {
+        if (indicatorValues.rsi <= phenotype.rsiOversold && tick.mid > indicatorValues.bollingerBandUpper) {
             if (futureTick.mid > tick.mid) {
                 stats.tradeCount++;
                 stats.winCount++;
@@ -268,7 +270,7 @@ function backtest(settings) {
         }
 
         // Put
-        if (indicatorValues.rsi >= (100 - settings.rsiOverbought) && tick.mid < indicatorValues.bollingerBandLower) {
+        if (indicatorValues.rsi >= (100 - phenotype.rsiOverbought) && tick.mid < indicatorValues.bollingerBandLower) {
             if (futureTick.mid < tick.mid) {
                 stats.tradeCount++;
                 stats.winCount++;
