@@ -1,15 +1,27 @@
 'use strict';
 
+// Get parameters.
+var argv = require('yargs').argv;
+var populationSize = parseInt(argv.populationSize);
+var evolutionCount = parseInt(argv.evolutionCount);
+
 // Check parameters.
-if (process.argv.length < 3) {
+if (!argv.file) {
     console.error('No input file provided.');
     process.exit(1);
 }
-
-// Parameters
-var inputFilePath = process.argv[2];
-var populationSize = 100;
-var evolutionCount = 100;
+if (!argv.parser) {
+    console.error('No parser specified.');
+    process.exit(1);
+}
+if (!argv.populationSize) {
+    console.error('No population size provided.');
+    process.exit(1);
+}
+if (!argv.evolutionCount) {
+    console.error('No evolution count provided.');
+    process.exit(1);
+}
 
 // State
 var ticks = [];
@@ -19,14 +31,14 @@ var tickIndex = {};
 // Libraries
 var _ = require('underscore');
 var GeneticAlgorithm = require('geneticalgorithm');
-var parser = require('../../lib/parsers/truefx.js');
+var parser = require('../../lib/parsers/' + argv.parser + '.js');
 var RsiIndicator = require('../../lib/indicators/rsi');
 var BollingerBandsIndicator = require('../../lib/indicators/bollingerBands');
 
 process.stdout.write('Loading data...');
 
 // Load data.
-parser.parse(inputFilePath).then(function(parsedTicks) {
+parser.parse(argv.file).then(function(parsedTicks) {
     process.stdout.write('done\n');
 
     ticks = parsedTicks;
