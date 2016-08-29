@@ -2,67 +2,85 @@
 
 // Check parameters.
 if (process.argv.length < 3) {
-    console.error('No symbol provided.');
+    console.error('No input file provided.');
     process.exit(1);
 }
 
 // Parameters
-var symbol = process.argv[2];
+var inputFilePath = process.argv[2];
 var populationSize = 100;
 var evolutionCount = 100;
+
+// State
+var ticks = [];
+var tickCount = ticks.length;
+var tickIndex = {};
 
 // Libraries
 var _ = require('underscore');
 var GeneticAlgorithm = require('geneticalgorithm');
+var parser = require('../../lib/parsers/truefx.js');
 var RsiIndicator = require('../../lib/indicators/rsi');
 var BollingerBandsIndicator = require('../../lib/indicators/bollingerBands');
 
-// Data
-var ticks = require('../../data/' + symbol + '.json');
-var tickCount = ticks.length;
+process.stdout.write('Loading data...');
 
-// State
-var tickIndex = {};
+// Load data.
+parser.parse(inputFilePath).then(function(parsedTicks) {
+    process.stdout.write('done\n');
 
-// Population for the algorithm.
-var population = [
-    {rsiLength: 42, rsiOverbought: 95, rsiOversold: 5, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
-    {rsiLength: 42, rsiOverbought: 88, rsiOversold: 12, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
-    {rsiLength: 43, rsiOverbought: 96, rsiOversold: 4, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
-    {rsiLength: 29, rsiOverbought: 51, rsiOversold: 49, bollingerBandsLength: 24, bollingerBandsDeviations: 2.4},
-    {rsiLength: 35, rsiOverbought: 93, rsiOversold: 7, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
-    {rsiLength: 34, rsiOverbought: 90, rsiOversold: 10, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
-    {rsiLength: 35, rsiOverbought: 88, rsiOversold: 12, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
-    {rsiLength: 35, rsiOverbought: 96, rsiOversold: 4, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8}
-];
+    ticks = parsedTicks;
+    tickCount = ticks.length;
+    tickIndex = {};
 
-// Set up the machine learning algorithm.
-var geneticAlgorithm = GeneticAlgorithm({
-    mutationFunction: mutationFunction,
-    // crossoverFunction: crossoverFunction,
-    fitnessFunction: fitnessFunction,
-    // doesABeatBFunction: competitionFunction,
-    population: population,
-    populationSize: populationSize
+    // Population for the algorithm.
+    var population = [
+        {rsiLength: 42, rsiOverbought: 95, rsiOversold: 5, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
+        {rsiLength: 42, rsiOverbought: 88, rsiOversold: 12, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
+        {rsiLength: 43, rsiOverbought: 96, rsiOversold: 4, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
+        {rsiLength: 29, rsiOverbought: 51, rsiOversold: 49, bollingerBandsLength: 24, bollingerBandsDeviations: 2.4},
+        {rsiLength: 35, rsiOverbought: 93, rsiOversold: 7, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
+        {rsiLength: 34, rsiOverbought: 90, rsiOversold: 10, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
+        {rsiLength: 35, rsiOverbought: 88, rsiOversold: 12, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
+        {rsiLength: 35, rsiOverbought: 96, rsiOversold: 4, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8}
+    ];
+
+    // Set up the machine learning algorithm.
+    var geneticAlgorithm = GeneticAlgorithm({
+        mutationFunction: mutationFunction,
+        crossoverFunction: crossoverFunction,
+        fitnessFunction: fitnessFunction,
+        // doesABeatBFunction: competitionFunction,
+        population: population,
+        populationSize: populationSize
+    });
+
+    process.stdout.write('Building data index...');
+
+    // Create a by-minute tick index.
+    ticks.forEach(function(tick, index) {
+        process.stdout.cursorTo(22);
+        process.stdout.write(((index / tickCount) * 100).toFixed(2) + '%   ');
+
+        tickIndex[tick.timestamp] = findFutureTick(tick, index);
+    });
+
+    process.stdout.cursorTo(22);
+    process.stdout.write('100%   \n');
+
+    // Run the algorithm.
+    _.times(evolutionCount, function(index) {
+        process.stdout.cursorTo(0);
+        process.stdout.write('Evolution ' + (index + 1) + ' of ' + evolutionCount + '...');
+
+        geneticAlgorithm.evolve();
+    });
+
+    // Show the results.
+    process.stdout.write('\n');
+    console.log(geneticAlgorithm.best());
+    process.stdout.write('\n');
 });
-
-// Create a by-minute tick index.
-ticks.forEach(function(tick, index) {
-    tickIndex[tick.createdAt] = findFutureTick(tick, index);
-});
-
-// Run the algorithm.
-_.times(evolutionCount, function(index) {
-    process.stdout.cursorTo(0);
-    process.stdout.write('Evolution ' + (index + 1) + ' of ' + evolutionCount + '...');
-
-    geneticAlgorithm.evolve();
-});
-
-// Show the results.
-process.stdout.write('\n');
-console.log(geneticAlgorithm.best());
-
 
 function mutationFunction(oldPhenotype) {
     var resultPhenotype = _.clone(oldPhenotype);
@@ -105,25 +123,25 @@ function crossoverFunction(phenotypeA, phenotypeB) {
     // Use phenotypeA and B to create phenotype result 1 and 2.
 
     if (generateRandomNumber(0, 1)) {
-        result1.rsiLength = phenotypeA.rsiLength;
-        result2.rsiLength = phenotypeB.rsiLength;
+        result1.rsiLength = phenotypeB.rsiLength;
+        result2.rsiLength = phenotypeA.rsiLength;
     }
 
     if (generateRandomNumber(0, 1)) {
-        result1.rsiOverbought = phenotypeA.rsiOverbought;
-        result2.rsiOverbought = phenotypeB.rsiOverbought;
-        result1.rsiOversold = phenotypeA.rsiOversold;
-        result2.rsiOversold = phenotypeB.rsiOversold;
+        result1.rsiOverbought = phenotypeB.rsiOverbought;
+        result2.rsiOverbought = phenotypeA.rsiOverbought;
+        result1.rsiOversold = phenotypeB.rsiOversold;
+        result2.rsiOversold = phenotypeA.rsiOversold;
     }
 
     if (generateRandomNumber(0, 1)) {
-        result1.bollingerBandsLength = phenotypeA.bollingerBandsLength;
-        result2.bollingerBandsLength = phenotypeB.bollingerBandsLength;
+        result1.bollingerBandsLength = phenotypeB.bollingerBandsLength;
+        result2.bollingerBandsLength = phenotypeA.bollingerBandsLength;
     }
 
     if (generateRandomNumber(0, 1)) {
-        result1.bollingerBandsDeviations = phenotypeA.bollingerBandsDeviations;
-        result2.bollingerBandsDeviations = phenotypeB.bollingerBandsDeviations;
+        result1.bollingerBandsDeviations = phenotypeB.bollingerBandsDeviations;
+        result2.bollingerBandsDeviations = phenotypeA.bollingerBandsDeviations;
     }
 
     return [result1, result2];
@@ -175,7 +193,7 @@ function backtest(settings) {
 
     ticks.forEach(function(tick, index) {
         // Reset things if there is >= an hour gap.
-        if (previousTick && new Date(tick.createdAt) - new Date(previousTick.createdAt) > 60 * 60 * 1000) {
+        if (previousTick && new Date(tick.timestamp) - new Date(previousTick.timestamp) > 60 * 60 * 1000) {
             cumulativeTicks = [];
             previousFutureTick = null;
             previousTick = null;
@@ -191,7 +209,7 @@ function backtest(settings) {
 
         cumulativeTicks.push({close: tick.mid});
 
-        var futureTick = tickIndex[tick.createdAt];
+        var futureTick = tickIndex[tick.timestamp];
         var indicatorValues = {};
 
         for (var indicatorIndex in indicators) {
@@ -218,7 +236,7 @@ function backtest(settings) {
         }
 
         // Don't worry about the last minute of the tick data.
-        if (previousFutureTick && futureTick.createdAt === previousFutureTick.createdAt) {
+        if (previousFutureTick && futureTick.timestamp === previousFutureTick.timestamp) {
             return;
         }
 
@@ -271,7 +289,8 @@ function findFutureTick(tick, startingIndex) {
     var futureTick = null;
 
     for (index = startingIndex; index < tickCount; index++) {
-        if (futureTick && new Date(ticks[index].createdAt) - new Date(tick.createdAt) > 60 * 1000) {
+
+        if (futureTick && new Date(ticks[index].timestamp) - new Date(tick.timestamp) > 60 * 1000) {
             break;
         }
         else {
