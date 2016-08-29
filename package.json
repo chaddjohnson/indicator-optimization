@@ -1,0 +1,9 @@
+{
+  "name": "optimizer",
+  "dependencies": {
+    "event-stream": "^3.3.4",
+    "geneticalgorithm": "^0.3.2",
+    "q": "^1.4.1",
+    "underscore": "^1.8.3"
+  }
+}

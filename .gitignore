@@ -2,6 +2,6 @@
 node_modules/
 data/
 *.log
-*.json
 *.png
 screenshots/
+settings.json
