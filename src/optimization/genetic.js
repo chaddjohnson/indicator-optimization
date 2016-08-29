@@ -26,19 +26,14 @@ var tickIndex = {};
 
 // Population for the algorithm.
 var population = [
-    {rsiLength: 7, rsiOverbought: 70, rsiOversold: 30, bollingerBandsLength: 20, bollingerBandsDeviations: 2.0},
-    {rsiLength: 7, rsiOverbought: 70, rsiOversold: 30, bollingerBandsLength: 22, bollingerBandsDeviations: 2.4},
-    {rsiLength: 5, rsiOverbought: 95, rsiOversold: 5, bollingerBandsLength: 29, bollingerBandsDeviations: 2.2},
-    {rsiLength: 5, rsiOverbought: 95, rsiOversold: 5, bollingerBandsLength: 24, bollingerBandsDeviations: 2.7},
-    {rsiLength: 29, rsiOverbought: 80, rsiOversold: 20, bollingerBandsLength: 23, bollingerBandsDeviations: 2.3},
-    {rsiLength: 29, rsiOverbought: 80, rsiOversold: 20, bollingerBandsLength: 25, bollingerBandsDeviations: 2.8},
-    {rsiLength: 2, rsiOverbought: 60, rsiOversold: 40, bollingerBandsLength: 21, bollingerBandsDeviations: 2.1},
-    {rsiLength: 6, rsiOverbought: 65, rsiOversold: 35, bollingerBandsLength: 27, bollingerBandsDeviations: 3.0},
-    {rsiLength: 8, rsiOverbought: 60, rsiOversold: 40, bollingerBandsLength: 23, bollingerBandsDeviations: 2.5},
-    {rsiLength: 21, rsiOverbought: 60, rsiOversold: 40, bollingerBandsLength: 24, bollingerBandsDeviations: 2.6},
-    {rsiLength: 28, rsiOverbought: 73, rsiOversold: 27, bollingerBandsLength: 26, bollingerBandsDeviations: 2.9},
-    {rsiLength: 25, rsiOverbought: 90, rsiOversold: 10, bollingerBandsLength: 19, bollingerBandsDeviations: 2.9},
-    {rsiLength: 18, rsiOverbought: 85, rsiOversold: 15, bollingerBandsLength: 18, bollingerBandsDeviations: 2.9}
+    {rsiLength: 42, rsiOverbought: 95, rsiOversold: 5, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
+    {rsiLength: 42, rsiOverbought: 88, rsiOversold: 12, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
+    {rsiLength: 43, rsiOverbought: 96, rsiOversold: 4, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
+    {rsiLength: 29, rsiOverbought: 51, rsiOversold: 49, bollingerBandsLength: 24, bollingerBandsDeviations: 2.4},
+    {rsiLength: 35, rsiOverbought: 93, rsiOversold: 7, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
+    {rsiLength: 34, rsiOverbought: 90, rsiOversold: 10, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
+    {rsiLength: 35, rsiOverbought: 88, rsiOversold: 12, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
+    {rsiLength: 35, rsiOverbought: 96, rsiOversold: 4, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8}
 ];
 
 // Set up the machine learning algorithm.
@@ -80,11 +75,11 @@ function mutationFunction(oldPhenotype) {
     // Use oldPhenotype and some random function to make a change to the phenotype.
     switch (propertyIndex) {
         case 0:
-            resultPhenotype.rsiLength = generateRandomNumber(2, 35);
+            resultPhenotype.rsiLength = generateRandomNumber(2, 45);
             break;
 
         case 1:
-            let change = generateRandomNumber(2, 40);
+            let change = generateRandomNumber(2, 50);
 
             resultPhenotype.rsiOverbought = 100 - change;
             resultPhenotype.rsiOversold = change;
@@ -92,11 +87,11 @@ function mutationFunction(oldPhenotype) {
             break;
 
         case 2:
-            resultPhenotype.bollingerBandsLength = generateRandomNumber(15, 30);
+            resultPhenotype.bollingerBandsLength = generateRandomNumber(10, 40);
             break;
 
         case 3:
-            resultPhenotype.bollingerBandsDeviations = generateRandomNumber(1.8, 3.2, 1);
+            resultPhenotype.bollingerBandsDeviations = generateRandomNumber(1.4, 3.2, 1);
             break;
     }
 
