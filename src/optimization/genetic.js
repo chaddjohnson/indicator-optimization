@@ -277,7 +277,7 @@ function backtest(phenotype) {
 
         // Call
         if (indicatorValues.rsi && indicatorValues.bollingerBandUpper) {
-            if (previousIndicatorValues.rsi <= phenotype.rsiOversold && indicatorValues > phenotype.rsiOversold && tick.mid < indicatorValues.bollingerBandLower) {
+            if (previousIndicatorValues.rsi <= phenotype.rsiOversold && indicatorValues.rsi > phenotype.rsiOversold && tick.mid < indicatorValues.bollingerBandLower) {
                 if (futureTick.mid > tick.mid) {
                     stats.tradeCount++;
                     stats.winCount++;
