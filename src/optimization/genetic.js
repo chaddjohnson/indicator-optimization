@@ -33,7 +33,6 @@ var _ = require('underscore');
 var GeneticAlgorithm = require('geneticalgorithm');
 var parser = require('../../lib/parsers/' + argv.parser + '.js');
 var RsiIndicator = require('../../lib/indicators/rsi');
-var BollingerBandsIndicator = require('../../lib/indicators/bollingerBands');
 var MacdIndicator = require('../../lib/indicators/macd');
 
 process.stdout.write('Loading data...');
@@ -48,14 +47,14 @@ parser.parse(argv.file).then(function(parsedTicks) {
 
     // Population for the algorithm.
     var population = [
-        {rsiLength: 42, rsiOverbought: 95, rsiOversold: 5, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4, macdShortEmaLength: 6, macdLongEmaLength: 20, macdSignalEmaLength: 9},
-        {rsiLength: 42, rsiOverbought: 88, rsiOversold: 12, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4, macdShortEmaLength: 12, macdLongEmaLength: 26, macdSignalEmaLength: 7},
-        {rsiLength: 43, rsiOverbought: 96, rsiOversold: 4, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4, macdShortEmaLength: 18, macdLongEmaLength: 30, macdSignalEmaLength: 3},
-        {rsiLength: 29, rsiOverbought: 51, rsiOversold: 49, bollingerBandsLength: 24, bollingerBandsDeviations: 2.4, macdShortEmaLength: 12, macdLongEmaLength: 26, macdSignalEmaLength: 9},
-        {rsiLength: 35, rsiOverbought: 93, rsiOversold: 7, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8, macdShortEmaLength: 9, macdLongEmaLength: 23, macdSignalEmaLength: 6},
-        {rsiLength: 34, rsiOverbought: 90, rsiOversold: 10, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8, macdShortEmaLength: 12, macdLongEmaLength: 32, macdSignalEmaLength: 12},
-        {rsiLength: 35, rsiOverbought: 88, rsiOversold: 12, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8, macdShortEmaLength: 14, macdLongEmaLength: 25, macdSignalEmaLength: 15},
-        {rsiLength: 35, rsiOverbought: 96, rsiOversold: 4, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8, macdShortEmaLength: 10, macdLongEmaLength: 28, macdSignalEmaLength: 11}
+        {rsiLength: 42, rsiOverbought: 95, rsiOversold: 5, macdShortEmaLength: 6, macdLongEmaLength: 20, macdSignalEmaLength: 9},
+        {rsiLength: 42, rsiOverbought: 88, rsiOversold: 12, macdShortEmaLength: 12, macdLongEmaLength: 26, macdSignalEmaLength: 7},
+        {rsiLength: 43, rsiOverbought: 96, rsiOversold: 4, macdShortEmaLength: 18, macdLongEmaLength: 30, macdSignalEmaLength: 3},
+        {rsiLength: 29, rsiOverbought: 51, rsiOversold: 49, macdShortEmaLength: 12, macdLongEmaLength: 26, macdSignalEmaLength: 9},
+        {rsiLength: 35, rsiOverbought: 93, rsiOversold: 7, macdShortEmaLength: 9, macdLongEmaLength: 23, macdSignalEmaLength: 6},
+        {rsiLength: 34, rsiOverbought: 90, rsiOversold: 10, macdShortEmaLength: 12, macdLongEmaLength: 32, macdSignalEmaLength: 12},
+        {rsiLength: 35, rsiOverbought: 88, rsiOversold: 12, macdShortEmaLength: 14, macdLongEmaLength: 25, macdSignalEmaLength: 15},
+        {rsiLength: 35, rsiOverbought: 96, rsiOversold: 4, macdShortEmaLength: 10, macdLongEmaLength: 28, macdSignalEmaLength: 11}
     ];
 
     // Set up the machine learning algorithm.
@@ -118,7 +117,7 @@ function mutationFunction(oldPhenotype) {
 
     // Select a random property to mutate.
     var propertyMin = 0;
-    var propertyMax = 6;
+    var propertyMax = 4;
     var propertyIndex = Math.floor(Math.random() * ((propertyMax - propertyMin) + 1)) + propertyMin;
 
     // Use oldPhenotype and some random function to make a change to the phenotype.
@@ -136,22 +135,14 @@ function mutationFunction(oldPhenotype) {
             break;
 
         case 2:
-            resultPhenotype.bollingerBandsLength = generateRandomNumber(10, 40);
-            break;
-
-        case 3:
-            resultPhenotype.bollingerBandsDeviations = generateRandomNumber(1.4, 3.2, 1);
-            break;
-
-        case 4:
             resultPhenotype.macdShortEmaLength = generateRandomNumber(6, 18);
             break;
 
-        case 5:
+        case 3:
             resultPhenotype.macdLongEmaLength = generateRandomNumber(20, 32);
             break;
 
-        case 6:
+        case 4:
             resultPhenotype.macdSignalEmaLength = generateRandomNumber(3, 15);
             break;
     }
@@ -175,16 +166,6 @@ function crossoverFunction(phenotypeA, phenotypeB) {
         result2.rsiOverbought = phenotypeA.rsiOverbought;
         result1.rsiOversold = phenotypeB.rsiOversold;
         result2.rsiOversold = phenotypeA.rsiOversold;
-    }
-
-    if (generateRandomNumber(0, 1)) {
-        result1.bollingerBandsLength = phenotypeB.bollingerBandsLength;
-        result2.bollingerBandsLength = phenotypeA.bollingerBandsLength;
-    }
-
-    if (generateRandomNumber(0, 1)) {
-        result1.bollingerBandsDeviations = phenotypeB.bollingerBandsDeviations;
-        result2.bollingerBandsDeviations = phenotypeA.bollingerBandsDeviations;
     }
 
     if (generateRandomNumber(0, 1)) {
@@ -251,7 +232,6 @@ function backtest(phenotype) {
     };
     var indicators = {
         rsi: new RsiIndicator({length: phenotype.rsiLength}, {rsi: 'rsi'}),
-        bollingerBands: new BollingerBandsIndicator({length: phenotype.bollingerBandsLength, deviations: phenotype.bollingerBandsDeviations}, {middle: 'bollingerBandMiddle', upper: 'bollingerBandUpper', lower: 'bollingerBandLower'}),
         macd: new MacdIndicator({shortEmaLength: phenotype.macdShortEmaLength, longEmaLength: phenotype.macdLongEmaLength, signalEmaLength: phenotype.macdSignalEmaLength}, {macd: 'macd', signal: 'macdSignal'})
     };
 
@@ -263,12 +243,10 @@ function backtest(phenotype) {
             previousTick = null;
 
             delete indicators.rsi;
-            delete indicators.bollingerBands;
             delete indicators.macd;
 
             indicators = {
                 rsi: new RsiIndicator({length: phenotype.rsiLength}, {rsi: 'rsi'}),
-                bollingerBands: new BollingerBandsIndicator({length: phenotype.bollingerBandsLength, deviations: phenotype.bollingerBandsDeviations}, {middle: 'bollingerBandMiddle', upper: 'bollingerBandUpper', lower: 'bollingerBandLower'}),
                 macd: new MacdIndicator({shortEmaLength: phenotype.macdShortEmaLength, longEmaLength: phenotype.macdLongEmaLength, signalEmaLength: phenotype.macdSignalEmaLength}, {macd: 'macd', signal: 'macdSignal'})
             };
         }
@@ -307,8 +285,8 @@ function backtest(phenotype) {
         }
 
         // Call
-        if (indicatorValues.rsi && indicatorValues.bollingerBandLower && indicatorValues.macd && indicatorValues.macdSignal) {
-            if (indicatorValues.rsi <= phenotype.rsiOversold && tick.mid < indicatorValues.bollingerBandLower && indicatorValues.macd < indicatorValues.macdSignal) {
+        if (indicatorValues.rsi && indicatorValues.macd && indicatorValues.macdSignal) {
+            if (indicatorValues.rsi <= phenotype.rsiOversold && indicatorValues.macd < indicatorValues.macdSignal) {
                 if (futureTick.mid > tick.mid) {
                     stats.tradeCount++;
                     stats.winCount++;
@@ -324,8 +302,8 @@ function backtest(phenotype) {
         }
 
         // Put
-        if (indicatorValues.rsi && indicatorValues.bollingerBandUpper && indicatorValues.macd && indicatorValues.macdSignal) {
-            if (indicatorValues.rsi >= (100 - phenotype.rsiOverbought) && tick.mid > indicatorValues.bollingerBandUpper && indicatorValues.macd > indicatorValues.macdSignal) {
+        if (indicatorValues.rsi && indicatorValues.macd && indicatorValues.macdSignal) {
+            if (indicatorValues.rsi >= (100 - phenotype.rsiOverbought) && indicatorValues.macd > indicatorValues.macdSignal) {
                 if (futureTick.mid < tick.mid) {
                     stats.tradeCount++;
                     stats.winCount++;
@@ -347,7 +325,6 @@ function backtest(phenotype) {
 
     // Free memory (just to be safe).
     delete indicators.rsi;
-    delete indicators.bollingerBands;
     delete indicators.macd;
 
     // Calculate the win rate.
