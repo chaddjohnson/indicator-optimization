@@ -33,7 +33,6 @@ var _ = require('underscore');
 var GeneticAlgorithm = require('geneticalgorithm');
 var parser = require('../../lib/parsers/' + argv.parser + '.js');
 var RsiIndicator = require('../../lib/indicators/rsi');
-var BollingerBandsIndicator = require('../../lib/indicators/bollingerBands');
 
 process.stdout.write('Loading data...');
 
@@ -47,14 +46,14 @@ parser.parse(argv.file).then(function(parsedTicks) {
 
     // Population for the algorithm.
     var population = [
-        {rsiLength: 42, rsiOverbought: 95, rsiOversold: 5, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
-        {rsiLength: 42, rsiOverbought: 88, rsiOversold: 12, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
-        {rsiLength: 43, rsiOverbought: 96, rsiOversold: 4, bollingerBandsLength: 36, bollingerBandsDeviations: 1.4},
-        {rsiLength: 29, rsiOverbought: 51, rsiOversold: 49, bollingerBandsLength: 24, bollingerBandsDeviations: 2.4},
-        {rsiLength: 35, rsiOverbought: 93, rsiOversold: 7, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
-        {rsiLength: 34, rsiOverbought: 90, rsiOversold: 10, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
-        {rsiLength: 35, rsiOverbought: 88, rsiOversold: 12, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8},
-        {rsiLength: 35, rsiOverbought: 96, rsiOversold: 4, bollingerBandsLength: 30, bollingerBandsDeviations: 1.8}
+        {rsiLength: 42, rsiOverbought: 95, rsiOversold: 5},
+        {rsiLength: 42, rsiOverbought: 88, rsiOversold: 12},
+        {rsiLength: 43, rsiOverbought: 96, rsiOversold: 4},
+        {rsiLength: 29, rsiOverbought: 51, rsiOversold: 49},
+        {rsiLength: 35, rsiOverbought: 93, rsiOversold: 7},
+        {rsiLength: 34, rsiOverbought: 90, rsiOversold: 10},
+        {rsiLength: 35, rsiOverbought: 88, rsiOversold: 12},
+        {rsiLength: 35, rsiOverbought: 96, rsiOversold: 4}
     ];
 
     // Set up the machine learning algorithm.
@@ -99,16 +98,12 @@ parser.parse(argv.file).then(function(parsedTicks) {
     // console.log({
     //     rsiLength: 14,
     //     rsiOverbought: 53,
-    //     rsiOversold: 47,
-    //     bollingerBandsLength: 30,
-    //     bollingerBandsDeviations: 2.7
+    //     rsiOversold: 47
     // });
     // console.log(backtest({
     //     rsiLength: 14,
     //     rsiOverbought: 53,
-    //     rsiOversold: 47,
-    //     bollingerBandsLength: 30,
-    //     bollingerBandsDeviations: 2.7
+    //     rsiOversold: 47
     // }));
 });
 
@@ -117,7 +112,7 @@ function mutationFunction(oldPhenotype) {
 
     // Select a random property to mutate.
     var propertyMin = 0;
-    var propertyMax = 3;
+    var propertyMax = 1;
     var propertyIndex = Math.floor(Math.random() * ((propertyMax - propertyMin) + 1)) + propertyMin;
 
     // Use oldPhenotype and some random function to make a change to the phenotype.
@@ -132,14 +127,6 @@ function mutationFunction(oldPhenotype) {
             resultPhenotype.rsiOverbought = 100 - change;
             resultPhenotype.rsiOversold = change;
 
-            break;
-
-        case 2:
-            resultPhenotype.bollingerBandsLength = generateRandomNumber(10, 40);
-            break;
-
-        case 3:
-            resultPhenotype.bollingerBandsDeviations = generateRandomNumber(1.4, 3.2, 1);
             break;
     }
 
@@ -162,16 +149,6 @@ function crossoverFunction(phenotypeA, phenotypeB) {
         result2.rsiOverbought = phenotypeA.rsiOverbought;
         result1.rsiOversold = phenotypeB.rsiOversold;
         result2.rsiOversold = phenotypeA.rsiOversold;
-    }
-
-    if (generateRandomNumber(0, 1)) {
-        result1.bollingerBandsLength = phenotypeB.bollingerBandsLength;
-        result2.bollingerBandsLength = phenotypeA.bollingerBandsLength;
-    }
-
-    if (generateRandomNumber(0, 1)) {
-        result1.bollingerBandsDeviations = phenotypeB.bollingerBandsDeviations;
-        result2.bollingerBandsDeviations = phenotypeA.bollingerBandsDeviations;
     }
 
     return [result1, result2];
@@ -222,8 +199,7 @@ function backtest(phenotype) {
         breakEvenCount: 0
     };
     var indicators = {
-        rsi: new RsiIndicator({length: phenotype.rsiLength}, {rsi: 'rsi'}),
-        bollingerBands: new BollingerBandsIndicator({length: phenotype.bollingerBandsLength, deviations: phenotype.bollingerBandsDeviations}, {middle: 'bollingerBandMiddle', upper: 'bollingerBandUpper', lower: 'bollingerBandLower'})
+        rsi: new RsiIndicator({length: phenotype.rsiLength}, {rsi: 'rsi'})
     };
 
     ticks.forEach(function(tick, index) {
@@ -234,11 +210,9 @@ function backtest(phenotype) {
             previousTick = null;
 
             delete indicators.rsi;
-            delete indicators.bollingerBands;
 
             indicators = {
-                rsi: new RsiIndicator({length: phenotype.rsiLength}, {rsi: 'rsi'}),
-                bollingerBands: new BollingerBandsIndicator({length: phenotype.bollingerBandsLength, deviations: phenotype.bollingerBandsDeviations}, {middle: 'bollingerBandMiddle', upper: 'bollingerBandUpper', lower: 'bollingerBandLower'})
+                rsi: new RsiIndicator({length: phenotype.rsiLength}, {rsi: 'rsi'})
             };
         }
 
@@ -276,8 +250,8 @@ function backtest(phenotype) {
         }
 
         // Call
-        if (indicatorValues.rsi && indicatorValues.bollingerBandUpper) {
-            if (previousIndicatorValues.rsi <= phenotype.rsiOversold && indicatorValues.rsi > phenotype.rsiOversold && tick.mid < indicatorValues.bollingerBandLower) {
+        if (indicatorValues.rsi) {
+            if (previousIndicatorValues.rsi <= phenotype.rsiOversold && indicatorValues.rsi > phenotype.rsiOversold) {
                 if (futureTick.mid > tick.mid) {
                     stats.tradeCount++;
                     stats.winCount++;
@@ -293,8 +267,8 @@ function backtest(phenotype) {
         }
 
         // Put
-        if (indicatorValues.rsi && indicatorValues.bollingerBandLower) {
-            if (previousIndicatorValues.rsi >= (100 - phenotype.rsiOverbought) && indicatorValues.rsi < (100 - phenotype.rsiOverbought) && tick.mid > indicatorValues.bollingerBandUpper) {
+        if (indicatorValues.rsi) {
+            if (previousIndicatorValues.rsi >= (100 - phenotype.rsiOverbought) && indicatorValues.rsi < (100 - phenotype.rsiOverbought)) {
                 if (futureTick.mid < tick.mid) {
                     stats.tradeCount++;
                     stats.winCount++;
@@ -316,7 +290,6 @@ function backtest(phenotype) {
 
     // Free memory (just to be safe).
     delete indicators.rsi;
-    delete indicators.bollingerBands;
 
     // Calculate the win rate.
     stats.winRate = (stats.winCount / stats.tradeCount) * 100;
