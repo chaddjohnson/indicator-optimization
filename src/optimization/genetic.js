@@ -277,10 +277,10 @@ function backtest(phenotype) {
             return;
         }
 
-        if (tick.mid < indicatorValues.bollingerBandLower) {
+        if (indicatorValues.bollingerBandLower && tick.mid < indicatorValues.bollingerBandLower) {
             bollingerBandLowerCounter = 5;
         }
-        if (tick.mid > indicatorValues.bollingerBandUpper) {
+        if (indicatorValues.bollingerBandUpper && tick.mid > indicatorValues.bollingerBandUpper) {
             bollingerBandUpperCounter = 5;
         }
 
