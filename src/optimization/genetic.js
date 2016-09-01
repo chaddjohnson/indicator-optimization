@@ -190,7 +190,7 @@ function fitnessFunction(phenotype) {
     }
 
     // Calculate the fitness based on the results and trade count.
-    fitness = (results.winRate / 100) * 0.5;
+    fitness = (results.winRate / 100);
 
     return fitness;
 }
