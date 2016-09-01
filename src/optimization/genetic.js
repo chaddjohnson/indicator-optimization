@@ -243,6 +243,8 @@ function backtest(phenotype) {
     var previousTick = null;
     var previousFutureTick = null;
     var previousIndicatorValues = null;
+    var bollingerBandLowerCounter = 0;
+    var bollingerBandUpperCounter = 0;
     var stats = {
         tradeCount: 0,
         winCount: 0,
@@ -306,9 +308,16 @@ function backtest(phenotype) {
             return;
         }
 
+        if (indicatorValues.bollingerBandLower && tick.mid < indicatorValues.bollingerBandLower) {
+            bollingerBandLowerCounter = 5;
+        }
+        if (indicatorValues.bollingerBandUpper && tick.mid > indicatorValues.bollingerBandUpper) {
+            bollingerBandUpperCounter = 5;
+        }
+
         // Call
         if (indicatorValues.rsi && indicatorValues.bollingerBandLower && indicatorValues.macd && indicatorValues.macdSignal) {
-            if (previousIndicatorValues.rsi <= phenotype.rsiOversold && indicatorValues.rsi > phenotype.rsiOversold && tick.mid < indicatorValues.bollingerBandLower && indicatorValues.macd < indicatorValues.macdSignal) {
+            if (previousIndicatorValues.rsi <= phenotype.rsiOversold && indicatorValues.rsi > phenotype.rsiOversold && bollingerBandLowerCounter > 0 && indicatorValues.macd < indicatorValues.macdSignal) {
                 if (futureTick.mid > tick.mid) {
                     stats.tradeCount++;
                     stats.winCount++;
@@ -325,7 +334,7 @@ function backtest(phenotype) {
 
         // Put
         if (indicatorValues.rsi && indicatorValues.bollingerBandUpper && indicatorValues.macd && indicatorValues.macdSignal) {
-            if (previousIndicatorValues.rsi >= (100 - phenotype.rsiOverbought) && indicatorValues.rsi < (100 - phenotype.rsiOverbought) && tick.mid > indicatorValues.bollingerBandUpper && indicatorValues.macd > indicatorValues.macdSignal) {
+            if (previousIndicatorValues.rsi >= (100 - phenotype.rsiOverbought) && indicatorValues.rsi < (100 - phenotype.rsiOverbought) && bollingerBandUpperCounter > 0 && indicatorValues.macd > indicatorValues.macdSignal) {
                 if (futureTick.mid < tick.mid) {
                     stats.tradeCount++;
                     stats.winCount++;
@@ -343,6 +352,8 @@ function backtest(phenotype) {
         previousTick = tick;
         previousFutureTick = futureTick;
         previousIndicatorValues = indicatorValues;
+        bollingerBandLowerCounter--;
+        bollingerBandUpperCounter--;
     });
 
     // Free memory (just to be safe).
