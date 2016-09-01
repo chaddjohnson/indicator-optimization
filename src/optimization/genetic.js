@@ -4,6 +4,7 @@
 var argv = require('yargs').argv;
 var populationSize = parseInt(argv.populationSize);
 var evolutionCount = parseInt(argv.evolutionCount);
+var minTradeCount = parseInt(argv.minTradeCount);
 
 // Check parameters.
 if (!argv.file) {
@@ -20,6 +21,10 @@ if (!argv.populationSize) {
 }
 if (!argv.evolutionCount) {
     console.error('No evolution count provided.');
+    process.exit(1);
+}
+if (!argv.minTradeCount) {
+    console.error('No minimum trade count provided.');
     process.exit(1);
 }
 
@@ -185,7 +190,7 @@ function fitnessFunction(phenotype) {
 
     var results = backtest(phenotype);
 
-    if (results.tradeCount < 100) {
+    if (results.tradeCount < minTradeCount) {
         return 0;
     }
 
