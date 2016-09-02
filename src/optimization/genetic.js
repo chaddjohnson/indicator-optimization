@@ -5,6 +5,7 @@ var argv = require('yargs').argv;
 var populationSize = parseInt(argv.populationSize);
 var evolutionCount = parseInt(argv.evolutionCount);
 var minTradeCount = parseInt(argv.minTradeCount);
+var seconds = parseInt(argv.seconds);
 
 // Check parameters.
 if (!argv.file) {
@@ -25,6 +26,10 @@ if (!argv.evolutionCount) {
 }
 if (!argv.minTradeCount) {
     console.error('No minimum trade count provided.');
+    process.exit(1);
+}
+if (!argv.seconds) {
+    console.error('No seconds value provided.');
     process.exit(1);
 }
 
@@ -378,7 +383,7 @@ function findFutureTick(tick, startingIndex) {
 
     for (index = startingIndex; index < tickCount; index++) {
 
-        if (futureTick && new Date(ticks[index].timestamp) - new Date(tick.timestamp) > 60 * 1000) {
+        if (futureTick && new Date(ticks[index].timestamp) - new Date(tick.timestamp) > seconds * 1000) {
             break;
         }
         else {
