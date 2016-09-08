@@ -91,42 +91,42 @@ parser.parse(argv.file).then(function(parsedTicks) {
     process.stdout.cursorTo(22);
     process.stdout.write('100%   \n');
 
-    // Run the algorithm.
-    _.times(evolutionCount, function(index) {
-        process.stdout.cursorTo(0);
-        process.stdout.write('Evolution ' + (index + 1) + ' of ' + evolutionCount + '...');
+    // // Run the algorithm.
+    // _.times(evolutionCount, function(index) {
+    //     process.stdout.cursorTo(0);
+    //     process.stdout.write('Evolution ' + (index + 1) + ' of ' + evolutionCount + '...');
 
-        geneticAlgorithm.evolve();
-    });
+    //     geneticAlgorithm.evolve();
+    // });
 
-    var bestPhenotype = geneticAlgorithm.best();
+    // var bestPhenotype = geneticAlgorithm.best();
 
-    // Show the results.
-    process.stdout.write('\n');
-    console.log(_.extend({}, bestPhenotype, backtest(bestPhenotype)));
-    process.stdout.write('\n');
+    // // Show the results.
+    // process.stdout.write('\n');
+    // console.log(_.extend({}, bestPhenotype, backtest(bestPhenotype)));
+    // process.stdout.write('\n');
 
     // Testing
-    // console.log({
-    //     rsiLength: 35,
-    //     rsiOverbought: 88,
-    //     rsiOversold: 12,
-    //     bollingerBandsLength: 13,
-    //     bollingerBandsDeviations: 1.7,
-    //     macdShortEmaLength: 8,
-    //     macdLongEmaLength: 21,
-    //     macdSignalEmaLength: 6
-    // });
-    // console.log(backtest({
-    //     rsiLength: 35,
-    //     rsiOverbought: 88,
-    //     rsiOversold: 12,
-    //     bollingerBandsLength: 13,
-    //     bollingerBandsDeviations: 1.7,
-    //     macdShortEmaLength: 8,
-    //     macdLongEmaLength: 21,
-    //     macdSignalEmaLength: 6
-    // }));
+    console.log({
+        rsiLength: 35,
+        rsiOverbought: 88,
+        rsiOversold: 12,
+        bollingerBandsLength: 13,
+        bollingerBandsDeviations: 1.7,
+        macdShortEmaLength: 8,
+        macdLongEmaLength: 25,
+        macdSignalEmaLength: 6
+    });
+    console.log(backtest({
+        rsiLength: 35,
+        rsiOverbought: 88,
+        rsiOversold: 12,
+        bollingerBandsLength: 13,
+        bollingerBandsDeviations: 1.7,
+        macdShortEmaLength: 8,
+        macdLongEmaLength: 25,
+        macdSignalEmaLength: 6
+    }));
 });
 
 function mutationFunction(oldPhenotype) {
