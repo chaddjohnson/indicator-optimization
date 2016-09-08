@@ -286,7 +286,6 @@ function backtest(phenotype) {
     var cumulativeTicks = [];
     var previousTick = null;
     var previousFutureTick = null;
-    var previousIndicatorValues = null;
     var bollingerBandLowerCounter = 0;
     var bollingerBandUpperCounter = 0;
     var stats = {
@@ -322,10 +321,9 @@ function backtest(phenotype) {
             };
         }
 
-        cumulativeTicks.push({close: tick.close});
+        cumulativeTicks.push(tick);
 
         var futureTick = tickIndex[tick.timestamp];
-        var indicatorValues = {};
 
         for (var indicatorIndex in indicators) {
             let indicatorProperty = '';
@@ -342,10 +340,10 @@ function backtest(phenotype) {
             // Grab each output for the indicator.
             for (indicatorProperty in indicatorOutputs) {
                 if (indicatorTickValues && typeof indicatorTickValues[indicatorOutputs[indicatorProperty]] === 'number') {
-                    indicatorValues[indicatorOutputs[indicatorProperty]] = indicatorTickValues[indicatorOutputs[indicatorProperty]];
+                    tick[indicatorOutputs[indicatorProperty]] = indicatorTickValues[indicatorOutputs[indicatorProperty]];
                 }
                 else {
-                    indicatorValues[indicatorOutputs[indicatorProperty]] = '';
+                    tick[indicatorOutputs[indicatorProperty]] = '';
                 }
             }
         }
@@ -355,16 +353,16 @@ function backtest(phenotype) {
             return;
         }
 
-        if (indicatorValues.bollingerBandLower && tick.close < indicatorValues.bollingerBandLower) {
+        if (tick.bollingerBandLower && tick.close < tick.bollingerBandLower) {
             bollingerBandLowerCounter = 5;
         }
-        if (indicatorValues.bollingerBandUpper && tick.close > indicatorValues.bollingerBandUpper) {
+        if (tick.bollingerBandUpper && tick.close > tick.bollingerBandUpper) {
             bollingerBandUpperCounter = 5;
         }
 
         // Call
-        if (indicatorValues.rsi && indicatorValues.bollingerBandLower && indicatorValues.macd && indicatorValues.macdSignal) {
-            if (previousIndicatorValues.rsi <= phenotype.rsiOversold && indicatorValues.rsi > phenotype.rsiOversold && bollingerBandLowerCounter > 0 && indicatorValues.macd < indicatorValues.macdSignal && tick.low < indicatorValues.prcLower) {
+        if (tick.rsi && tick.bollingerBandLower && tick.macd && tick.macdSignal) {
+            if (previousTick.rsi <= phenotype.rsiOversold && tick.rsi > phenotype.rsiOversold && bollingerBandLowerCounter > 0 && tick.macd < tick.macdSignal && tick.low < tick.prcLower) {
                 if (futureTick.close > tick.close) {
                     stats.tradeCount++;
                     stats.winCount++;
@@ -380,8 +378,8 @@ function backtest(phenotype) {
         }
 
         // Put
-        if (indicatorValues.rsi && indicatorValues.bollingerBandUpper && indicatorValues.macd && indicatorValues.macdSignal) {
-            if (previousIndicatorValues.rsi >= (100 - phenotype.rsiOverbought) && indicatorValues.rsi < (100 - phenotype.rsiOverbought) && bollingerBandUpperCounter > 0 && indicatorValues.macd > indicatorValues.macdSignal && tick.high > indicatorValues.prcUpper) {
+        if (tick.rsi && tick.bollingerBandUpper && tick.macd && tick.macdSignal) {
+            if (previousTick.rsi >= (100 - phenotype.rsiOverbought) && tick.rsi < (100 - phenotype.rsiOverbought) && bollingerBandUpperCounter > 0 && tick.macd > tick.macdSignal && tick.high > tick.prcUpper) {
                 if (futureTick.close < tick.close) {
                     stats.tradeCount++;
                     stats.winCount++;
@@ -398,7 +396,6 @@ function backtest(phenotype) {
 
         previousTick = tick;
         previousFutureTick = futureTick;
-        previousIndicatorValues = indicatorValues;
         bollingerBandLowerCounter--;
         bollingerBandUpperCounter--;
     });
