@@ -263,7 +263,6 @@ function backtest(phenotype) {
     var cumulativeTicks = [];
     var previousTick = null;
     var previousFutureTick = null;
-    var previousIndicatorValues = null;
     var stats = {
         tradeCount: 0,
         winCount: 0,
@@ -294,10 +293,9 @@ function backtest(phenotype) {
             };
         }
 
-        cumulativeTicks.push({close: tick.close});
+        cumulativeTicks.push(tick);
 
         var futureTick = tickIndex[tick.timestamp];
-        var indicatorValues = {};
 
         for (var indicatorIndex in indicators) {
             let indicatorProperty = '';
@@ -314,10 +312,10 @@ function backtest(phenotype) {
             // Grab each output for the indicator.
             for (indicatorProperty in indicatorOutputs) {
                 if (indicatorTickValues && typeof indicatorTickValues[indicatorOutputs[indicatorProperty]] === 'number') {
-                    indicatorValues[indicatorOutputs[indicatorProperty]] = indicatorTickValues[indicatorOutputs[indicatorProperty]];
+                    tick[indicatorOutputs[indicatorProperty]] = indicatorTickValues[indicatorOutputs[indicatorProperty]];
                 }
                 else {
-                    indicatorValues[indicatorOutputs[indicatorProperty]] = '';
+                    tick[indicatorOutputs[indicatorProperty]] = '';
                 }
             }
         }
@@ -328,8 +326,8 @@ function backtest(phenotype) {
         }
 
         // Call
-        if (indicatorValues.rsi && indicatorValues.macd && indicatorValues.macdSignal) {
-            if (previousIndicatorValues.rsi <= phenotype.rsiOversold && indicatorValues.rsi > phenotype.rsiOversold && indicatorValues.macd < indicatorValues.macdSignal && tick.low < indicatorValues.prcLower) {
+        if (tick.rsi && tick.macd && tick.macdSignal) {
+            if (previousTick.rsi <= phenotype.rsiOversold && tick.rsi > phenotype.rsiOversold && tick.macd < tick.macdSignal && tick.low < tick.prcLower) {
                 if (futureTick.close > tick.close) {
                     stats.tradeCount++;
                     stats.winCount++;
@@ -345,8 +343,8 @@ function backtest(phenotype) {
         }
 
         // Put
-        if (indicatorValues.rsi && indicatorValues.macd && indicatorValues.macdSignal) {
-            if (previousIndicatorValues.rsi >= (100 - phenotype.rsiOverbought) && indicatorValues.rsi < (100 - phenotype.rsiOverbought) && indicatorValues.macd > indicatorValues.macdSignal && tick.high > indicatorValues.prcUpper) {
+        if (tick.rsi && tick.macd && tick.macdSignal) {
+            if (previousTick.rsi >= (100 - phenotype.rsiOverbought) && tick.rsi < (100 - phenotype.rsiOverbought) && tick.macd > tick.macdSignal && tick.high > tick.prcUpper) {
                 if (futureTick.close < tick.close) {
                     stats.tradeCount++;
                     stats.winCount++;
@@ -363,7 +361,6 @@ function backtest(phenotype) {
 
         previousTick = tick;
         previousFutureTick = futureTick;
-        previousIndicatorValues = indicatorValues;
     });
 
     // Free memory (just to be safe).
