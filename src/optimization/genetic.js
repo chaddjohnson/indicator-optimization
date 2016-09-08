@@ -91,36 +91,42 @@ parser.parse(argv.file).then(function(parsedTicks) {
     process.stdout.cursorTo(22);
     process.stdout.write('100%   \n');
 
-    // Run the algorithm.
-    _.times(evolutionCount, function(index) {
-        process.stdout.cursorTo(0);
-        process.stdout.write('Evolution ' + (index + 1) + ' of ' + evolutionCount + '...');
+    // // Run the algorithm.
+    // _.times(evolutionCount, function(index) {
+    //     process.stdout.cursorTo(0);
+    //     process.stdout.write('Evolution ' + (index + 1) + ' of ' + evolutionCount + '...');
 
-        geneticAlgorithm.evolve();
-    });
+    //     geneticAlgorithm.evolve();
+    // });
 
-    var bestPhenotype = geneticAlgorithm.best();
+    // var bestPhenotype = geneticAlgorithm.best();
 
-    // Show the results.
-    process.stdout.write('\n');
-    console.log(_.extend({}, bestPhenotype, backtest(bestPhenotype)));
-    process.stdout.write('\n');
+    // // Show the results.
+    // process.stdout.write('\n');
+    // console.log(_.extend({}, bestPhenotype, backtest(bestPhenotype)));
+    // process.stdout.write('\n');
 
     // Testing
-    // console.log({
-    //     rsiLength: 14,
-    //     rsiOverbought: 53,
-    //     rsiOversold: 47,
-    //     bollingerBandsLength: 30,
-    //     bollingerBandsDeviations: 2.7
-    // });
-    // console.log(backtest({
-    //     rsiLength: 14,
-    //     rsiOverbought: 53,
-    //     rsiOversold: 47,
-    //     bollingerBandsLength: 30,
-    //     bollingerBandsDeviations: 2.7
-    // }));
+    console.log({
+        rsiLength: 35,
+        rsiOverbought: 88,
+        rsiOversold: 12,
+        bollingerBandsLength: 13,
+        bollingerBandsDeviations: 1.7,
+        macdShortEmaLength: 8,
+        macdLongEmaLength: 21,
+        macdSignalEmaLength: 6
+    });
+    console.log(backtest({
+        rsiLength: 35,
+        rsiOverbought: 88,
+        rsiOversold: 12,
+        bollingerBandsLength: 13,
+        bollingerBandsDeviations: 1.7,
+        macdShortEmaLength: 8,
+        macdLongEmaLength: 21,
+        macdSignalEmaLength: 6
+    }));
 });
 
 function mutationFunction(oldPhenotype) {
@@ -285,7 +291,7 @@ function backtest(phenotype) {
             };
         }
 
-        cumulativeTicks.push({close: tick.mid});
+        cumulativeTicks.push({close: tick.close});
 
         var futureTick = tickIndex[tick.timestamp];
         var indicatorValues = {};
@@ -318,25 +324,25 @@ function backtest(phenotype) {
             return;
         }
 
-        if (indicatorValues.bollingerBandLower && tick.mid < indicatorValues.bollingerBandLower) {
+        if (indicatorValues.bollingerBandLower && tick.close < indicatorValues.bollingerBandLower) {
             bollingerBandLowerCounter = 5;
         }
-        if (indicatorValues.bollingerBandUpper && tick.mid > indicatorValues.bollingerBandUpper) {
+        if (indicatorValues.bollingerBandUpper && tick.close > indicatorValues.bollingerBandUpper) {
             bollingerBandUpperCounter = 5;
         }
 
         // Call
         if (indicatorValues.rsi && indicatorValues.bollingerBandLower && indicatorValues.macd && indicatorValues.macdSignal) {
             if (previousIndicatorValues.rsi <= phenotype.rsiOversold && indicatorValues.rsi > phenotype.rsiOversold && bollingerBandLowerCounter > 0 && indicatorValues.macd < indicatorValues.macdSignal) {
-                if (futureTick.mid > tick.mid) {
+                if (futureTick.close > tick.close) {
                     stats.tradeCount++;
                     stats.winCount++;
                 }
-                else if (futureTick.mid < tick.mid) {
+                else if (futureTick.close < tick.close) {
                     stats.tradeCount++;
                     stats.loseCount++;
                 }
-                else if (futureTick.mid === tick.mid) {
+                else if (futureTick.close === tick.close) {
                     stats.breakEvenCount++;
                 }
             }
@@ -345,15 +351,15 @@ function backtest(phenotype) {
         // Put
         if (indicatorValues.rsi && indicatorValues.bollingerBandUpper && indicatorValues.macd && indicatorValues.macdSignal) {
             if (previousIndicatorValues.rsi >= (100 - phenotype.rsiOverbought) && indicatorValues.rsi < (100 - phenotype.rsiOverbought) && bollingerBandUpperCounter > 0 && indicatorValues.macd > indicatorValues.macdSignal) {
-                if (futureTick.mid < tick.mid) {
+                if (futureTick.close < tick.close) {
                     stats.tradeCount++;
                     stats.winCount++;
                 }
-                else if (futureTick.mid > tick.mid) {
+                else if (futureTick.close > tick.close) {
                     stats.tradeCount++;
                     stats.loseCount++;
                 }
-                else if (futureTick.mid === tick.mid) {
+                else if (futureTick.close === tick.close) {
                     stats.breakEvenCount++;
                 }
             }
