@@ -91,7 +91,7 @@ parser.parse(argv.file).then(function(parsedTicks) {
     process.stdout.cursorTo(22);
     process.stdout.write('100%   \n');
 
-    // // Run the algorithm.
+    // Run the algorithm.
     _.times(evolutionCount, function(index) {
         process.stdout.cursorTo(0);
         process.stdout.write('Evolution ' + (index + 1) + ' of ' + evolutionCount + '...');
